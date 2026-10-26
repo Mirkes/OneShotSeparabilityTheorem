@@ -14,38 +14,42 @@ distrs = {"Uniform in cubes", "Gaussian", "Product of exponential",...
     "Product of Laplace", "Product of Pareto"};
 dist = ["Cube", "Gauss", "Exp", "Laplace", "Pareto"];
 nDist = length(dist);
-legs = {"Theoretical one-shot", "Universal boundary",...
-    "Empirical one-shot", "Fisher $c_i=x_i$", "General linear",...
-    "Nonlinear neural network",...
-    "Universal formula $c_i=\frac{x_i}{1+|x_i|}$"};
+legs = {"Theoretical one-shot", "Universal boundary","Empirical one-shot", "Fisher $c_i=x_i$", "General linear",...
+    "Nonlinear neural network", "Universal formula $c_i=\frac{x_i}{1+|x_i|}$"};
 
-% Line styles
+
 styles = ["-", "-", ":", "--", "-", "-", ":"]; 
-% Line colours
-cols = ["#19A979", '#F5A623', "#2E86C1", "#E74C3C", "#34495E",...
-    "#7D3C98", "#9B59B6"];
-% Line width
+cols = ["#19A979", '#F5A623', "#2E86C1", "#E74C3C", "#34495E", "#7D3C98", "#9B59B6"];
 widths = [2, 2, 2, 2, 2, 3, 2, 2];
 
+% Form data
+dims = [5:15,20:5:80]';
+nDims = length(dims);
+
+% Save data for figure
+load("DataForFigures.mat");
+
+% Now form figures
+
+drawOrder = [6, 1, 2, 3, 4, 5, 7];
 
 figure("Position", [10, 10, 800, 700]);
-t = tiledlayout(3, 2); % 3 rows, 2 columns
-% Define reasonable intervals to avoid meaningless fragments
+t = tiledlayout(3, 2); % 1 row, 2 columns
 xlims = [5, 35; 5, 50; 5, 55; 5, 75; 5, 60];
+numLines = 7;
+legArr = gobjects(1, numLines);
 
 for k = 1:nDist
     ax = nexttile;
-    % Load data of this distribution
-    load(dist(k) + "/SetData.mat");
-
     for kk = 1:numLines
-        semilogy(dims, res(:, kk), styles(kk),...
-            'LineWidth', widths(kk), "Color", cols(kk));
+        legArr(drawOrder(kk)) = semilogy(data{k, drawOrder(kk)}(:, 1),...
+            data{k, drawOrder(kk)}(:, 2), styles(drawOrder(kk)),...
+            'LineWidth', widths(drawOrder(kk)),...
+            "Color", cols(drawOrder(kk)),...
+            'DisplayName', legs{drawOrder(kk)});
         hold on
     end
-    % You can modify this interval as you like but usage of one interval is
-    % very reasonable.
-    ylim(ax, [0.95, 1000]); 
+    ylim(ax, [0.95, 1000]);
     xlim(ax, xlims(k, :));
     fontsize(gcf, 10, "points");
     xlabel("Dimension");
@@ -56,7 +60,7 @@ for k = 1:nDist
 end
 
 % Legend to position 6
-lgd = legend(legs,'Interpreter','latex');
+lgd = legend(legArr,'Interpreter','latex');
 lgd.Layout.Tile = 6; 
 fontsize(lgd, 12, "points");
 
